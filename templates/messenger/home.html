@@ -1,0 +1,177 @@
+{% extends 'messenger/base.html' %}
+{% block title %}SecureStego — Hide in Plain Sight{% endblock %}
+
+{% block public_content %}
+<!-- ── Navbar ── -->
+<nav class="navbar navbar-expand-lg stego-navbar-public">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand stego-brand" href="{% url 'home' %}">
+      <i class="bi bi-shield-lock-fill"></i> SecureStego
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto gap-2 align-items-center">
+        <li class="nav-item"><a class="nav-link" href="#">Security</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Protocol</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Enterprise</a></li>
+        <li class="nav-item ms-2">
+          <a href="{% url 'login' %}" class="btn btn-outline-info btn-sm">Login</a>
+        </li>
+        <li class="nav-item">
+          <a href="{% url 'signup' %}" class="btn btn-cipher btn-sm">Sign Up</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero Section ── -->
+<section class="hero-section">
+  <div class="container-fluid px-4">
+    <div class="row align-items-center min-vh-85">
+
+      <!-- Left: Hero copy -->
+      <div class="col-lg-6 hero-copy">
+        <div class="hero-badge mb-3">
+          <span class="badge-dot"></span> PROTOCOL V2.4 SECURED
+        </div>
+        <h1 class="hero-headline">
+          Hide in <span class="text-cipher">Plain Sight.</span>
+        </h1>
+        <p class="hero-subtext">
+          The ultimate communication layer for the privacy-conscious. We combine
+          AES-256 encryption with advanced steganography to embed your messages
+          within everyday digital media.
+        </p>
+        <div class="hero-actions mt-4">
+          <a href="{% url 'signup' %}" class="btn btn-cipher btn-lg me-3">
+            Get Started
+          </a>
+          <a href="#features" class="btn btn-ghost btn-lg">
+            <i class="bi bi-play-circle me-2"></i>Watch Demo
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: Login card -->
+      <div class="col-lg-5 offset-lg-1 mt-5 mt-lg-0">
+        <div class="auth-card">
+          <div class="auth-tabs">
+            <a href="{% url 'login' %}" class="auth-tab active">Login</a>
+            <a href="{% url 'signup' %}" class="auth-tab">Sign Up</a>
+          </div>
+          <form method="post" action="{% url 'login' %}" class="auth-form mt-4">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label-stego">OPERATOR IDENTIFIER</label>
+              <div class="input-icon-wrap">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" name="username" class="form-control stego-input" placeholder="Operator_ID" autocomplete="username" required>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-stego">ACCESS KEY</label>
+              <div class="input-icon-wrap">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" name="password" class="form-control stego-input" placeholder="••••••••" autocomplete="current-password" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-cipher w-100 mt-2">
+              INITIALIZE CONNECTION
+            </button>
+            <p class="text-center mt-3">
+              <a href="#" class="link-muted">Forgotten Credentials?</a>
+            </p>
+          </form>
+          <input type="hidden" name="csrfmiddlewaretoken" value="">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ── -->
+<section class="features-section py-5" id="features">
+  <div class="container py-5">
+    <h2 class="section-title text-center mb-2">Invisible Security Layer</h2>
+    <p class="section-sub text-center mb-5">
+      Standard encryption hides the content. SecureStego hides the <em>existence</em> of the communication itself.
+    </p>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-layers-fill"></i></div>
+          <h4>Steganographic Carrier</h4>
+          <p>Hide your encrypted payload inside images, audio, or video files with zero detectable visual or acoustic distortion.</p>
+          <span class="feature-badge"><i class="bi bi-shield-check me-1"></i>ZERO-DISTORTION ALGORITHM</span>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-lock-fill"></i></div>
+          <h4>Dual-Layer Encryption</h4>
+          <p>Military-grade AES-256 combined with RSA-4096 handshakes ensures that even if the carrier is detected, the content remains locked.</p>
+          <span class="feature-badge"><i class="bi bi-check-circle me-1"></i>END-TO-END VERIFIED</span>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-eye-slash-fill"></i></div>
+          <h4>Zero Metadata Log</h4>
+          <p>Our servers never store IP addresses, timestamps, or routing data. Your communication trail evaporates instantly after extraction.</p>
+          <span class="feature-badge"><i class="bi bi-diagram-3 me-1"></i>ANONYMOUS ROUTING</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section py-5">
+  <div class="container text-center py-4">
+    <h2 class="cta-title">Join the Invisible Network</h2>
+    <p class="cta-sub mb-4">Start communicating without leaving a footprint. Deploy your own node in under 5 minutes.</p>
+    <a href="{% url 'signup' %}" class="btn btn-cipher btn-lg me-3">Create Account</a>
+    <a href="#" class="btn btn-outline-secondary btn-lg">Enterprise Inquiry</a>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer class="stego-footer py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="footer-brand mb-2">
+          <i class="bi bi-shield-lock-fill"></i> SecureStego
+        </div>
+        <p class="footer-tagline">The world's most advanced steganographic messenger. Security is not a luxury; it's a fundamental right.</p>
+      </div>
+      <div class="col-md-4 offset-md-4">
+        <div class="row">
+          <div class="col-6">
+            <h6 class="footer-heading">RESOURCES</h6>
+            <ul class="footer-links">
+              <li><a href="#">Documentation</a></li>
+              <li><a href="#">API Docs</a></li>
+              <li><a href="#">Security Audit</a></li>
+            </ul>
+          </div>
+          <div class="col-6">
+            <h6 class="footer-heading">LEGAL</h6>
+            <ul class="footer-links">
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Compliance</a></li>
+              <li><a href="#">Terms of Op</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr class="footer-divider mt-4">
+    <p class="footer-copy text-center">© 2024 SECURESTEGO SYSTEMS · ALL DATA ENCRYPTED</p>
+  </div>
+</footer>
+{% endblock public_content %}

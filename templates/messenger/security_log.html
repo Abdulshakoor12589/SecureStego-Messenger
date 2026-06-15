@@ -1,0 +1,45 @@
+{% extends 'messenger/base.html' %}
+{% block title %}Security Log — SecureStego{% endblock %}
+{% block page_title %}Security Audit Log{% endblock %}
+
+{% block content %}
+<div class="flow-header mb-4">
+  <h2 class="flow-title">Security Audit Log</h2>
+  <p class="flow-sub">All security-relevant events on your node, last 100 entries.</p>
+</div>
+
+<div class="settings-card">
+  <div class="table-responsive">
+    <table class="stego-table">
+      <thead>
+        <tr>
+          <th>EVENT</th>
+          <th>DESCRIPTION</th>
+          <th>IP ADDRESS</th>
+          <th>TIMESTAMP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>
+            <span class="badge log-badge log-badge-{{ log.event_type }}">
+              {{ log.event_type|upper }}
+            </span>
+          </td>
+          <td class="log-desc">{{ log.description|default:"—" }}</td>
+          <td class="font-mono">{{ log.ip_address|default:"—" }}</td>
+          <td>{{ log.timestamp|date:"d M Y H:i:s" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center text-muted py-5">
+            <i class="bi bi-terminal me-2"></i>No security events logged.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'messenger/base.html' %}
+{% block title %}Decrypt — SecureStego{% endblock %}
+{% block page_title %}Decryption Flow{% endblock %}
+
+{% block content %}
+<div class="flow-header mb-4">
+  <div>
+    <h2 class="flow-title">Decryption Flow</h2>
+    <p class="flow-sub">Recover the original message from an extracted encrypted payload.</p>
+  </div>
+  <div class="flow-step-indicator">
+    <span class="step-current">STEP 04</span> / <span class="step-total">04</span>
+  </div>
+</div>
+<div class="step-progress mb-4">
+  <div class="step-bar step-bar-active" style="width: 100%"></div>
+</div>
+
+{% if not decrypted_message %}
+<div class="flow-card">
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mb-4">
+      <div class="payload-label mb-2">ENCRYPTED PAYLOAD</div>
+      <textarea name="encrypted_payload" class="form-control stego-input stego-textarea"
+                placeholder="Paste extracted cipher payload here..."
+                rows="4" spellcheck="false" required>{{ request.GET.payload }}</textarea>
+      {% if form.encrypted_payload.errors %}
+        <div class="form-error mt-1">{{ form.encrypted_payload.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-4">
+      <div class="payload-label mb-2">SECRET KEY</div>
+      <div class="input-icon-wrap">
+        <i class="bi bi-key input-icon"></i>
+        <input type="text" name="secret_key"
+               class="form-control stego-input font-mono"
+               placeholder="Enter your Fernet secret key..."
+               autocomplete="off" spellcheck="false"
+               id="secretKeyInput">
+      </div>
+      <div class="key-valid-indicator mt-1" id="keyValidIndicator"></div>
+      {% if form.secret_key.errors %}
+        <div class="form-error mt-1">{{ form.secret_key.errors.0 }}</div>
+      {% endif %}
+    </div>
+
+    <div class="d-flex justify-content-end">
+      <button type="submit" class="btn btn-cipher btn-flow">
+        DECRYPT MESSAGE <i class="bi bi-unlock ms-2"></i>
+      </button>
+    </div>
+  </form>
+</div>
+
+{% else %}
+<!-- ── Decryption Result ── -->
+<div class="flow-card">
+  <div class="result-success-banner mb-4">
+    <i class="bi bi-unlock-fill me-2"></i>Message decrypted successfully.
+  </div>
+
+  <div class="payload-label mb-2">ORIGINAL MESSAGE</div>
+  <div class="decrypted-output mb-4">
+    <p class="decrypted-text">{{ decrypted_message }}</p>
+    <button class="btn btn-icon-copy" onclick="copyText('{{ decrypted_message|escapejs }}')" title="Copy">
+      <i class="bi bi-clipboard"></i>
+    </button>
+  </div>
+
+  <div class="d-flex gap-3">
+    <a href="{% url 'decrypt' %}" class="btn btn-ghost">Decrypt Another</a>
+    <a href="{% url 'dashboard' %}" class="btn btn-cipher">Back to Dashboard</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const keyInput = document.getElementById('secretKeyInput');
+const indicator = document.getElementById('keyValidIndicator');
+
+if (keyInput && indicator) {
+  keyInput.addEventListener('input', () => {
+    const key = keyInput.value.trim();
+    if (key.length < 20) { indicator.innerHTML = ''; return; }
+    fetch(`/api/validate-key/?key=${encodeURIComponent(key)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.valid) {
+          indicator.innerHTML = '<span class="key-ok"><i class="bi bi-check-circle-fill me-1"></i>Valid Fernet key format</span>';
+        } else {
+          indicator.innerHTML = '<span class="key-err"><i class="bi bi-x-circle-fill me-1"></i>Invalid key format</span>';
+        }
+      });
+  });
+}
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.currentTarget;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-check2"></i>';
+    setTimeout(() => btn.innerHTML = orig, 1500);
+  });
+}
+</script>
+{% endblock %}

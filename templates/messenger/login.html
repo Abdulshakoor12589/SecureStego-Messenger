@@ -1,0 +1,63 @@
+{% extends 'messenger/base.html' %}
+{% block title %}Login — SecureStego{% endblock %}
+
+{% block public_content %}
+<div class="auth-page-wrapper">
+  <nav class="navbar stego-navbar-public px-4">
+    <a class="navbar-brand stego-brand" href="{% url 'home' %}">
+      <i class="bi bi-shield-lock-fill"></i> SecureStego
+    </a>
+  </nav>
+
+  <div class="auth-center">
+    <div class="auth-card auth-card-standalone">
+      <div class="auth-tabs">
+        <a href="{% url 'login' %}" class="auth-tab active">Login</a>
+        <a href="{% url 'signup' %}" class="auth-tab">Sign Up</a>
+      </div>
+
+      {% if form.non_field_errors %}
+      <div class="alert stego-alert alert-danger mt-3">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ form.non_field_errors.0 }}
+      </div>
+      {% endif %}
+
+      <form method="post" class="auth-form mt-4" autocomplete="off">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label-stego">OPERATOR IDENTIFIER</label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-person input-icon"></i>
+            {{ form.username }}
+          </div>
+          {% if form.username.errors %}
+            <div class="form-error mt-1">{{ form.username.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="mb-3">
+          <label class="form-label-stego">ACCESS KEY</label>
+          <div class="input-icon-wrap">
+            <i class="bi bi-lock input-icon"></i>
+            {{ form.password }}
+          </div>
+          {% if form.password.errors %}
+            <div class="form-error mt-1">{{ form.password.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <button type="submit" class="btn btn-cipher w-100 mt-2">
+          INITIALIZE CONNECTION
+        </button>
+      </form>
+
+      <p class="text-center mt-3 mb-0">
+        <a href="#" class="link-muted">Forgotten Credentials?</a>
+      </p>
+      <p class="text-center mt-2">
+        <span class="link-muted">No account? </span>
+        <a href="{% url 'signup' %}" class="link-cipher">Register Node</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock public_content %}

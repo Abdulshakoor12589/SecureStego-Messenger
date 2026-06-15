@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureStego — Student Setup Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap');
+  :root {
+    --bg:#080b12; --bg2:#0d1120; --bg3:#111827; --border:#1e2d45;
+    --cyan:#00e5ff; --purple:#a855f7; --green:#10b981;
+    --yellow:#fbbf24; --red:#f87171; --text:#e2e8f0; --muted:#64748b;
+    --font:'Syne',sans-serif; --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;line-height:1.6;padding:40px 30px;max-width:960px;margin:0 auto;}
+  .header{text-align:center;padding:40px 20px 32px;border:1px solid var(--border);border-radius:16px;background:var(--bg2);margin-bottom:32px;position:relative;overflow:hidden;}
+  .header::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:300px;height:300px;background:radial-gradient(circle,rgba(0,229,255,0.08) 0%,transparent 70%);pointer-events:none;}
+  .header-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);border-radius:20px;padding:5px 16px;font-family:var(--mono);font-size:11px;color:var(--cyan);letter-spacing:1px;margin-bottom:16px;}
+  .dot-pulse{width:7px;height:7px;background:var(--cyan);border-radius:50%;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+  .header h1{font-size:36px;font-weight:800;letter-spacing:-1px;margin-bottom:8px;}
+  .header h1 span{color:var(--cyan);}
+  .header p{color:var(--muted);font-size:14px;max-width:500px;margin:0 auto;}
+  .section{margin-bottom:28px;}
+  .section-title{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);font-family:var(--mono);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .section-title .num{background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.2);border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--cyan);}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;}
+  .card-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .cmd{background:#050810;border:1px solid var(--border);border-left:3px solid var(--cyan);border-radius:8px;padding:12px 16px;font-family:var(--mono);font-size:13px;color:var(--cyan);margin:8px 0;letter-spacing:0.3px;}
+  .cmd .prompt{color:var(--muted);margin-right:8px;}
+  .step-list{list-style:none;}
+  .step-list li{display:flex;align-items:flex-start;gap:14px;padding:10px 0;border-bottom:1px solid rgba(30,45,69,0.5);}
+  .step-list li:last-child{border-bottom:none;}
+  .step-num{width:26px;height:26px;background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--cyan);flex-shrink:0;margin-top:1px;}
+  .step-text{font-size:13px;color:var(--text);line-height:1.6;}
+  .step-text strong{color:var(--cyan);font-weight:600;}
+  .step-text .url{font-family:var(--mono);font-size:12px;color:var(--yellow);background:rgba(251,191,36,0.06);padding:2px 8px;border-radius:4px;display:inline-block;margin-top:3px;}
+  .rule-row{display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid rgba(30,45,69,0.5);font-size:13px;}
+  .rule-row:last-child{border-bottom:none;}
+  .ok{color:var(--green);}
+  .no{color:var(--red);}
+  .option-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .option-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;}
+  .option-icon{font-size:28px;margin-bottom:8px;}
+  .option-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;}
+  .option-desc{font-size:12px;color:var(--muted);}
+  .summary-box{background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.2);border-radius:12px;padding:20px 24px;text-align:center;margin-top:28px;}
+  .summary-box .label{font-size:11px;font-family:var(--mono);letter-spacing:1px;color:var(--cyan);margin-bottom:10px;}
+  .summary-box p{font-size:15px;font-weight:600;color:var(--text);line-height:1.7;max-width:700px;margin:0 auto;}
+  .summary-box p span{color:var(--cyan);}
+  .footer{text-align:center;padding:20px;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:1px;border-top:1px solid var(--border);margin-top:32px;}
+  .warn-box{background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);margin-top:10px;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge"><div class="dot-pulse"></div> STUDENT SETUP & DEPLOYMENT GUIDE</div>
+  <h1>SecureStego <span>Messenger</span></h1>
+  <p>Everything a student needs to install and run this project on their laptop</p>
+</div>
+
+<div class="section">
+  <div class="section-title"><div class="num">1</div> Install These First</div>
+  <div class="card">
+    <ul class="step-list">
+      <li>
+        <div class="step-num">01</div>
+        <div class="step-text"><strong>Python 3.11</strong> — download from python.org/downloads<br>
+        <span style="color:#f87171;font-size:12px;">⚠ During install — tick the box "Add Python to PATH"</span></div>
+      </li>
+      <li>
+        <div class="step-num">02</div>
+        <div class="step-text"><strong>VS Code</strong> — download from code.visualstudio.com</div>
+      </li>
+      <li>
+        <div class="step-num">03</div>
+        <div class="step-text"><strong>Python Extension</strong> inside VS Code — open VS Code → Extensions tab → search Python → install</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><div class="num">2</div> How to Get the Project</div>
+  <div class="option-grid">
+    <div class="option-card">
+      <div class="option-icon">💾</div>
+      <div class="option-title">Via USB</div>
+      <div class="option-desc">Copy securestego_messenger folder directly to D:\ drive</div>
+    </div>
+    <div class="option-card">
+      <div class="option-icon">📲</div>
+      <div class="option-title">WhatsApp / Google Drive</div>
+      <div class="option-desc">Send as ZIP → Download → Right click → Extract All → to D:\</div>
+    </div>
+    <div class="option-card">
+      <div class="option-icon">🌐</div>
+      <div class="option-title">Online (No Setup)</div>
+      <div class="option-desc">Deploy to pythonanywhere.com — student just opens a link in browser</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><div class="num">3</div> Run the Project — Commands</div>
+  <div class="card">
+    <ul class="step-list">
+      <li>
+        <div class="step-num">01</div>
+        <div class="step-text">Open <strong>PowerShell</strong> — press Windows Key + R → type powershell → Enter</div>
+      </li>
+      <li>
+        <div class="step-num">02</div>
+        <div class="step-text">Go to project folder
+          <div class="cmd"><span class="prompt">PS></span> cd "D:\securestego_messenger"</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">03</div>
+        <div class="step-text">Install all required packages
+          <div class="cmd"><span class="prompt">PS></span> pip install django python-dotenv cryptography Pillow whitenoise gunicorn</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">04</div>
+        <div class="step-text">Create the database — run once only on first setup
+          <div class="cmd"><span class="prompt">PS></span> python manage.py migrate</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">05</div>
+        <div class="step-text">Start the server
+          <div class="cmd"><span class="prompt">PS></span> python manage.py runserver</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">06</div>
+        <div class="step-text">Open browser and go to
+          <div class="url">http://127.0.0.1:8000</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title"><div class="num">4</div> Important Rules</div>
+  <div class="card">
+    <div class="rule-row"><span class="no">✗</span><span>Never delete the <strong style="color:#00e5ff;">.env</strong> file — project will crash without it</span></div>
+    <div class="rule-row"><span class="no">✗</span><span>Never run urls.py, views.py, settings.py, models.py directly with python</span></div>
+    <div class="rule-row"><span class="no">✗</span><span>Never close PowerShell while server is running</span></div>
+    <div class="rule-row"><span class="ok">✓</span><span>Only ever run <strong style="color:#00e5ff;">manage.py</strong> — that is the only file you run</span></div>
+    <div class="rule-row"><span class="ok">✓</span><span>Terminal must always be inside the <strong style="color:#00e5ff;">securestego_messenger</strong> folder</span></div>
+    <div class="rule-row"><span class="ok">✓</span><span>Run <strong style="color:#00e5ff;">migrate</strong> only once on the very first setup</span></div>
+  </div>
+</div>
+
+<div class="summary-box">
+  <div class="label">SAVE THIS FILE AT — D:\securestego_messenger\static\images\</div>
+  <p>Project runs at <span>http://127.0.0.1:8000</span> — always start server with <span>python manage.py runserver</span></p>
+</div>
+
+<div class="footer">SECURESTEGO MESSENGER · STUDENT SETUP GUIDE · KEEP THIS FILE SAFE</div>
+
+</body>
+</html>

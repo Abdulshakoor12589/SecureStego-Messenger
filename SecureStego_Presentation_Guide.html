@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureStego — Supervisor Presentation Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg:        #080b12;
+    --bg2:       #0d1120;
+    --bg3:       #111827;
+    --border:    #1e2d45;
+    --cyan:      #00e5ff;
+    --purple:    #a855f7;
+    --green:     #10b981;
+    --yellow:    #fbbf24;
+    --red:       #f87171;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --font:      'Syne', sans-serif;
+    --mono:      'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 40px 30px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    padding: 40px 20px 32px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--bg2);
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%;
+    transform: translateX(-50%);
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 20px;
+    padding: 5px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+  .dot-pulse {
+    width: 7px; height: 7px;
+    background: var(--cyan);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+  .header h1 {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+  .header h1 span { color: var(--cyan); }
+  .header p {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  /* ── Section titles ── */
+  .section {
+    margin-bottom: 28px;
+  }
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    font-family: var(--mono);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-title .num {
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 6px;
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--cyan);
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+  }
+  .card-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* ── Command blocks ── */
+  .cmd {
+    background: #050810;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--cyan);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--cyan);
+    margin: 8px 0;
+    letter-spacing: 0.3px;
+  }
+  .cmd .prompt { color: var(--muted); margin-right: 8px; }
+
+  /* ── Step list ── */
+  .step-list { list-style: none; }
+  .step-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(30,45,69,0.5);
+  }
+  .step-list li:last-child { border-bottom: none; }
+  .step-num {
+    width: 26px; height: 26px;
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--cyan);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-text { font-size: 13px; color: var(--text); line-height: 1.6; }
+  .step-text strong { color: var(--cyan); font-weight: 600; }
+  .step-text .url {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--yellow);
+    background: rgba(251,191,36,0.06);
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 3px;
+  }
+  .step-text .say {
+    background: rgba(168,85,247,0.08);
+    border-left: 2px solid var(--purple);
+    padding: 6px 12px;
+    margin-top: 6px;
+    border-radius: 0 6px 6px 0;
+    font-size: 12px;
+    color: #c4b5fd;
+    font-style: italic;
+  }
+
+  /* ── Demo table ── */
+  .demo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .demo-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .demo-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(30,45,69,0.4);
+    vertical-align: top;
+  }
+  .demo-table tr:last-child td { border-bottom: none; }
+  .demo-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .page-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--cyan);
+    background: rgba(0,229,255,0.08);
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .url-small {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--yellow);
+  }
+  .say-small {
+    font-size: 12px;
+    color: #c4b5fd;
+    font-style: italic;
+    margin-top: 3px;
+  }
+
+  /* ── Fix table ── */
+  .fix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .fix-table th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .fix-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid rgba(30,45,69,0.4);
+    font-size: 12px;
+  }
+  .fix-table tr:last-child td { border-bottom: none; }
+  .problem { color: var(--red); }
+  .solution { color: var(--green); font-family: var(--mono); font-size: 11px; }
+
+  /* ── Reminder boxes ── */
+  .reminder-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .reminder-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+  .reminder-box .icon { font-size: 22px; margin-bottom: 8px; }
+  .reminder-box .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .reminder-box .desc { font-size: 11px; color: var(--muted); }
+
+  /* ── Summary box ── */
+  .summary-box {
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 12px;
+    padding: 20px 24px;
+    text-align: center;
+    margin-top: 28px;
+  }
+  .summary-box .label {
+    font-size: 11px;
+    font-family: var(--mono);
+    letter-spacing: 1px;
+    color: var(--cyan);
+    margin-bottom: 10px;
+  }
+  .summary-box p {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .summary-box p span { color: var(--cyan); }
+
+  /* ── Tags ── */
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .tag-green { background: rgba(16,185,129,0.1); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+  .tag-yellow { background: rgba(251,191,36,0.1); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+  .tag-red { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+
+  @media print {
+    body { background: white; color: black; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="header-badge">
+    <div class="dot-pulse"></div>
+    SUPERVISOR PRESENTATION GUIDE
+  </div>
+  <h1>SecureStego <span>Messenger</span></h1>
+  <p>Complete step-by-step guide for showing your project to supervisor or client</p>
+</div>
+
+
+<!-- ── SECTION 1: DAY BEFORE ── -->
+<div class="section">
+  <div class="section-title">
+    <div class="num">1</div>
+    Day Before — Preparation
+  </div>
+  <div class="card">
+    <ul class="step-list">
+      <li>
+        <div class="step-num">01</div>
+        <div class="step-text">Open PowerShell and start your server to confirm everything works
+          <div class="cmd"><span class="prompt">PS></span> cd "D:\securestego_messenger"</div>
+          <div class="cmd"><span class="prompt">PS></span> python manage.py runserver</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">02</div>
+        <div class="step-text">Open browser and check all pages load correctly
+          <div class="url">http://127.0.0.1:8000</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">03</div>
+        <div class="step-text"><strong>Create a demo account</strong> — go to signup page and register with a username and password you will remember
+          <div class="url">http://127.0.0.1:8000/signup/</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">04</div>
+        <div class="step-text">Take screenshots of all pages and save them in <strong>D:\securestego_messenger\static\images\</strong> as backup</div>
+      </li>
+      <li>
+        <div class="step-num">05</div>
+        <div class="step-text"><strong>Charge your laptop fully</strong> and practice the demo at least 2 times</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ── SECTION 2: ON THE DAY ── -->
+<div class="section">
+  <div class="section-title">
+    <div class="num">2</div>
+    On The Day — Before Supervisor Arrives
+  </div>
+  <div class="card">
+    <ul class="step-list">
+      <li>
+        <div class="step-num">01</div>
+        <div class="step-text">Press <strong>Windows Key + R</strong> → type <strong>powershell</strong> → press Enter</div>
+      </li>
+      <li>
+        <div class="step-num">02</div>
+        <div class="step-text">Go to project folder
+          <div class="cmd"><span class="prompt">PS></span> cd "D:\securestego_messenger"</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">03</div>
+        <div class="step-text">Start the server
+          <div class="cmd"><span class="prompt">PS></span> python manage.py runserver</div>
+          Wait until you see: <strong style="color:var(--green)">Starting development server at http://127.0.0.1:8000/</strong>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">04</div>
+        <div class="step-text">Open Chrome or Edge browser and go to
+          <div class="url">http://127.0.0.1:8000</div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">05</div>
+        <div class="step-text"><strong style="color:var(--red)">NEVER close PowerShell</strong> while showing the demo — server stops if you close it</div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ── SECTION 3: DEMO ORDER ── -->
+<div class="section">
+  <div class="section-title">
+    <div class="num">3</div>
+    In Front of Supervisor — Demo Order
+  </div>
+  <div class="card">
+    <table class="demo-table">
+      <thead>
+        <tr>
+          <th>Step</th>
+          <th>Page</th>
+          <th>URL</th>
+          <th>What to Say & Do</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="page-num">01</span></td>
+          <td><strong>Home Page</strong></td>
+          <td><span class="url-small">/</span></td>
+          <td>
+            <div class="say-small">"This is SecureStego Messenger — a secure system combining Encryption and Steganography. Normal encryption hides message content. Our system also hides the existence of the message inside an image."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="page-num">02</span></td>
+          <td><strong>Signup</strong></td>
+          <td><span class="url-small">/signup/</span></td>
+          <td>
+            Register a new account live.<br>
+            <div class="say-small">"Passwords are stored as hashed values — never plain text. Django handles secure authentication."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="page-num">03</span></td>
+          <td><strong>Dashboard</strong></td>
+          <td><span class="url-small">/dashboard/</span></td>
+          <td>
+            <div class="say-small">"The dashboard shows all operations, encryption count, and security status."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="page-num">04</span></td>
+          <td><strong>Encrypt</strong></td>
+          <td><span class="url-small">/encrypt/</span></td>
+          <td>
+            Type: <em style="color:var(--yellow)">"This is my secret message for the demo"</em><br>
+            Click Encrypt. Copy and save the key shown.<br>
+            <div class="say-small">"Message encrypted using Fernet AES-128. The key is never stored on the server — sender must share it privately."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="page-num">05</span></td>
+          <td><strong>Embed</strong></td>
+          <td><span class="url-small">/embed/</span></td>
+          <td>
+            Upload any photo from laptop. Download the stego image.<br>
+            <div class="say-small">"Encrypted message is hidden in the image using LSB Steganography — changing only the last bit of each pixel. Zero visible difference to the image."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="page-num">06</span></td>
+          <td><strong>Extract</strong></td>
+          <td><span class="url-small">/extract/</span></td>
+          <td>
+            Upload the stego image you just downloaded.<br>
+            <div class="say-small">"The system reads pixel data and extracts the hidden encrypted payload."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="page-num">07</span></td>
+          <td><strong>Decrypt</strong></td>
+          <td><span class="url-small">/decrypt/</span></td>
+          <td>
+            Paste payload + enter the saved key. Click Decrypt.<br>
+            <div class="say-small">"Original message recovered. Full secure communication cycle is complete."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="page-num">08</span></td>
+          <td><strong>Settings</strong></td>
+          <td><span class="url-small">/settings/</span></td>
+          <td>
+            <div class="say-small">"Users generate AES-256 keys here. Key history is tracked. Two-factor auth and session timeout available."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="page-num">09</span></td>
+          <td><strong>Security Log</strong></td>
+          <td><span class="url-small">/security-log/</span></td>
+          <td>
+            <div class="say-small">"Every action is logged — logins, encryptions, failed attempts. Full security audit trail."</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ── SECTION 4: IF SOMETHING GOES WRONG ── -->
+<div class="section">
+  <div class="section-title">
+    <div class="num">4</div>
+    If Something Goes Wrong — Quick Fixes
+  </div>
+  <div class="card">
+    <table class="fix-table">
+      <thead>
+        <tr>
+          <th>Problem</th>
+          <th>Fix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="problem">Server stopped or PowerShell closed</td>
+          <td class="solution">cd "D:\securestego_messenger" → python manage.py runserver</td>
+        </tr>
+        <tr>
+          <td class="problem">Page shows error or red screen</td>
+          <td class="solution">Show screenshots from static\images\ folder as backup</td>
+        </tr>
+        <tr>
+          <td class="problem">Forgot login password</td>
+          <td class="solution">Go to /signup/ and register a new account</td>
+        </tr>
+        <tr>
+          <td class="problem">Browser closed accidentally</td>
+          <td class="solution">Reopen browser → type http://127.0.0.1:8000 (server keeps running)</td>
+        </tr>
+        <tr>
+          <td class="problem">Laptop goes to sleep</td>
+          <td class="solution">Wake it up → reopen browser → go to http://127.0.0.1:8000</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ── SECTION 5: REMINDERS ── -->
+<div class="section">
+  <div class="section-title">
+    <div class="num">5</div>
+    Important Reminders
+  </div>
+  <div class="reminder-grid">
+    <div class="reminder-box">
+      <div class="icon">🔋</div>
+      <div class="label">Charge Laptop</div>
+      <div class="desc">Fully charge the night before. Bring charger.</div>
+    </div>
+    <div class="reminder-box">
+      <div class="icon">🔑</div>
+      <div class="label">Save Secret Key</div>
+      <div class="desc">Copy the encryption key to Notepad before demo.</div>
+    </div>
+    <div class="reminder-box">
+      <div class="icon">🖼️</div>
+      <div class="label">Have Test Image</div>
+      <div class="desc">Keep any .png or .jpg ready to upload during demo.</div>
+    </div>
+    <div class="reminder-box">
+      <div class="icon">📸</div>
+      <div class="label">Screenshots Ready</div>
+      <div class="desc">Backup screenshots in static\images\ folder.</div>
+    </div>
+    <div class="reminder-box">
+      <div class="icon">🖥️</div>
+      <div class="label">Keep PowerShell Open</div>
+      <div class="desc">Never close the terminal during the demo.</div>
+    </div>
+    <div class="reminder-box">
+      <div class="icon">🎯</div>
+      <div class="label">Practice 2 Times</div>
+      <div class="desc">Run full demo yourself before meeting supervisor.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── SUMMARY ── -->
+<div class="summary-box">
+  <div class="label">ONE LINE TO REMEMBER — SAY THIS TO SUPERVISOR</div>
+  <p>"SecureStego Messenger <span>encrypts messages using AES encryption</span> and then <span>hides them inside images using LSB Steganography</span> — so the communication is both unreadable and invisible to anyone who intercepts it."</p>
+</div>
+
+
+<!-- ── FOOTER ── -->
+<div class="footer">
+  SECURESTEGO MESSENGER · SUPERVISOR PRESENTATION GUIDE · SAVE THIS FILE IN D:\securestego_messenger\static\images\
+</div>
+
+</body>
+</html>

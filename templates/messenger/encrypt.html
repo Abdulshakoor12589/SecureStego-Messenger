@@ -1,0 +1,115 @@
+{% extends 'messenger/base.html' %}
+{% block title %}Encrypt — SecureStego{% endblock %}
+{% block page_title %}Encryption Flow{% endblock %}
+
+{% block content %}
+<div class="flow-header mb-4">
+  <div>
+    <h2 class="flow-title">Encryption Flow</h2>
+    <p class="flow-sub">Conceal sensitive data within visual carrier assets.</p>
+  </div>
+  <div class="flow-step-indicator">
+    <span class="step-current">STEP 01</span> / <span class="step-total">04</span>
+  </div>
+</div>
+
+<!-- Step progress bar -->
+<div class="step-progress mb-4">
+  <div class="step-bar step-bar-active" style="width: 25%"></div>
+</div>
+
+{% if not encrypted_result %}
+<!-- ── Step 1: Input Message ── -->
+<div class="flow-card">
+  <form method="post" id="encryptForm">
+    {% csrf_token %}
+    <div class="payload-label mb-2">INPUT SECRET PAYLOAD</div>
+    <div class="textarea-wrap">
+      {{ form.message }}
+      <div class="textarea-meta">
+        <span class="encryption-badge">
+          <i class="bi bi-lock-fill me-1"></i>ENCRYPTION: AES-256-GCM (AUTO)
+        </span>
+        <span class="char-count" id="charCount">0 CHARACTERS</span>
+      </div>
+    </div>
+    {% if form.message.errors %}
+    <div class="form-error mt-2">{{ form.message.errors.0 }}</div>
+    {% endif %}
+    <div class="d-flex justify-content-end mt-4">
+      <button type="submit" class="btn btn-cipher btn-flow">
+        INITIALIZE CARRIER <i class="bi bi-arrow-right ms-2"></i>
+      </button>
+    </div>
+  </form>
+</div>
+
+{% else %}
+<!-- ── Step 2: Encryption Result ── -->
+<div class="flow-step-progress mb-4">
+  <div class="step-bar step-bar-active" style="width: 50%"></div>
+</div>
+
+<div class="flow-card mb-4">
+  <div class="result-success-banner mb-3">
+    <i class="bi bi-check-circle-fill me-2"></i>Message encrypted successfully.
+  </div>
+
+  <div class="payload-label mb-2">ENCRYPTED PAYLOAD</div>
+  <div class="cipher-output mb-4">
+    <code class="cipher-text">{{ encrypted_result }}</code>
+    <button class="btn btn-icon-copy" onclick="copyText('{{ encrypted_result }}')" title="Copy payload">
+      <i class="bi bi-clipboard"></i>
+    </button>
+  </div>
+
+  <div class="key-alert mb-4">
+    <div class="key-alert-header">
+      <i class="bi bi-key-fill me-2 text-warning"></i>
+      <strong>SECRET KEY — COPY NOW</strong>
+    </div>
+    <div class="key-display mt-2">
+      <code id="secretKeyDisplay">{{ secret_key }}</code>
+      <button class="btn btn-icon-copy ms-2" onclick="copyText('{{ secret_key }}')" title="Copy key">
+        <i class="bi bi-clipboard"></i>
+      </button>
+    </div>
+    <p class="key-warning mt-2 mb-0">
+      <i class="bi bi-exclamation-triangle me-1"></i>
+      This key is NOT stored anywhere. Copy it before proceeding to Step 3.
+    </p>
+  </div>
+
+  <div class="d-flex gap-3 justify-content-between align-items-center">
+    <a href="{% url 'encrypt' %}" class="btn btn-ghost">
+      <i class="bi bi-arrow-left me-2"></i>Start Over
+    </a>
+    <a href="{% url 'embed' %}?payload={{ encrypted_result|urlencode }}&key={{ secret_key|urlencode }}"
+       class="btn btn-cipher btn-flow">
+      PROCEED TO EMBED <i class="bi bi-arrow-right ms-2"></i>
+    </a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const msgArea = document.getElementById('id_message');
+const counter = document.getElementById('charCount');
+if (msgArea && counter) {
+  msgArea.addEventListener('input', () => {
+    counter.textContent = msgArea.value.length + ' CHARACTERS';
+  });
+}
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.currentTarget;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-check2"></i>';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 1500);
+  });
+}
+</script>
+{% endblock %}

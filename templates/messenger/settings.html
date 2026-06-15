@@ -1,0 +1,201 @@
+{% extends 'messenger/base.html' %}
+{% block title %}Settings — SecureStego{% endblock %}
+{% block page_title %}Security & Key Management{% endblock %}
+
+{% block content %}
+<div class="flow-header mb-4">
+  <div>
+    <h2 class="flow-title">Security & Key Management</h2>
+    <p class="flow-sub">Configure your cryptographic environment and manage AES-256 session keys. High-entropy key generation is processed on local hardware.</p>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Key Generator -->
+  <div class="col-lg-7">
+    <div class="settings-card h-100">
+      <div class="settings-card-header">
+        <h4 class="settings-card-title text-cipher">Generate New AES-256 Key</h4>
+        <i class="bi bi-key-fill text-muted"></i>
+      </div>
+
+      {% if new_key %}
+      <div class="mb-3">
+        <div class="payload-label mb-1">MASTER KEY STRING</div>
+        <div class="key-display-box">
+          <code id="newKeyDisplay">{{ new_key }}</code>
+          <button class="btn btn-icon-copy ms-2" onclick="copyKeyText()" title="Copy key">
+            <i class="bi bi-clipboard"></i>
+          </button>
+        </div>
+        <p class="key-warning mt-2">
+          <i class="bi bi-info-circle me-1"></i>
+          System uses FIPS 140-2 compliant hardware entropy for key generation.
+        </p>
+      </div>
+      {% else %}
+      <div class="mb-3">
+        <div class="payload-label mb-1">MASTER KEY STRING</div>
+        <div class="key-display-box key-placeholder">
+          <code>Generate a key to view it here</code>
+        </div>
+        <p class="text-muted small mt-2">System uses FIPS 140-2 compliant hardware entropy for key generation.</p>
+      </div>
+      {% endif %}
+
+      <div class="d-flex gap-3 mt-4">
+        <form method="post" class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="generate_key">
+          <button type="submit" class="btn btn-outline-info">
+            <i class="bi bi-arrow-repeat me-2"></i>Generate New Key
+          </button>
+        </form>
+        <button class="btn btn-outline-secondary" onclick="exportKey()">
+          Export Vault
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Security Toggles -->
+  <div class="col-lg-5">
+    <div class="settings-card h-100">
+      <div class="settings-card-header">
+        <h4 class="settings-card-title">Global Security</h4>
+        <i class="bi bi-shield-fill-check text-muted"></i>
+      </div>
+
+      <!-- 2FA Toggle -->
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Two-Factor Auth</div>
+          <div class="toggle-desc">Require biometric verification</div>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="toggle_2fa">
+          <button type="submit" class="toggle-btn {% if profile.two_factor_enabled %}toggle-on{% endif %}"
+                  role="switch" aria-checked="{{ profile.two_factor_enabled|lower }}">
+            <span class="toggle-thumb"></span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Session Timeout Toggle -->
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Automatic Session Timeout</div>
+          <div class="toggle-desc">Lock after 15m of inactivity</div>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="toggle_session_timeout">
+          <button type="submit" class="toggle-btn {% if profile.session_timeout %}toggle-on{% endif %}"
+                  role="switch">
+            <span class="toggle-thumb"></span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Advanced Mode notice -->
+      <div class="advanced-mode-box mt-3">
+        <div class="advanced-mode-header">
+          <i class="bi bi-exclamation-triangle me-2 text-warning"></i>
+          <span class="text-warning">ADVANCED MODE</span>
+        </div>
+        <p class="advanced-mode-text">Enabling kernel-level protection requires a system reboot and root certificate installation.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Key History Table ── -->
+<div class="settings-card">
+  <div class="settings-card-header d-flex justify-content-between align-items-center">
+    <h4 class="settings-card-title mb-0">Key History</h4>
+    <div class="input-icon-wrap" style="width: 220px;">
+      <i class="bi bi-search input-icon"></i>
+      <input type="text" class="form-control stego-input" placeholder="Filter ID..." id="keyFilter">
+    </div>
+  </div>
+
+  <div class="table-responsive mt-3">
+    <table class="stego-table">
+      <thead>
+        <tr>
+          <th>KEY ID</th>
+          <th>CREATED DATE</th>
+          <th>TYPE</th>
+          <th>STATUS</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody id="keyTableBody">
+        {% for event in key_events %}
+        <tr>
+          <td class="font-mono">K-{{ forloop.counter|stringformat:"03d" }}-{{ event.timestamp|date:"d" }}-XA</td>
+          <td>{{ event.timestamp|date:"M d, Y · H:i" }} UTC</td>
+          <td><span class="badge badge-aes">AES-256</span></td>
+          <td>
+            {% if forloop.first %}
+              <span class="status-active"><span class="status-dot status-secure"></span> Active</span>
+            {% else %}
+              <span class="status-archived"><span class="status-dot"></span> Archived</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if forloop.first %}
+              <i class="bi bi-eye text-muted action-icon-btn"></i>
+            {% else %}
+              <i class="bi bi-clock-history text-muted action-icon-btn"></i>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center text-muted py-4">
+            No key generation history yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="text-center mt-3">
+    <a href="{% url 'security_log' %}" class="btn btn-ghost btn-sm">View Full Audit Log</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyKeyText() {
+  const key = document.getElementById('newKeyDisplay')?.textContent?.trim();
+  if (!key) return;
+  navigator.clipboard.writeText(key).then(() => {
+    const btn = event.currentTarget;
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-check2"></i>';
+    setTimeout(() => btn.innerHTML = orig, 1500);
+  });
+}
+function exportKey() {
+  const key = document.getElementById('newKeyDisplay')?.textContent?.trim();
+  if (!key) { alert('Generate a key first.'); return; }
+  const blob = new Blob([key], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'securestego_key.txt';
+  a.click();
+}
+// Filter key table
+document.getElementById('keyFilter')?.addEventListener('input', function() {
+  const val = this.value.toLowerCase();
+  document.querySelectorAll('#keyTableBody tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+  });
+});
+</script>
+{% endblock %}

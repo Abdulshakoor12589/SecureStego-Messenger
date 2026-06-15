@@ -1,0 +1,146 @@
+{% extends 'messenger/base.html' %}
+{% block title %}Embed — SecureStego{% endblock %}
+{% block page_title %}Steganography Flow{% endblock %}
+
+{% block content %}
+<div class="flow-header mb-4">
+  <div>
+    <h2 class="flow-title">Steganography Flow</h2>
+    <p class="flow-sub">Inject the encrypted payload into a carrier image.</p>
+  </div>
+  <div class="flow-step-indicator">
+    <span class="step-current">STEP 03</span> / <span class="step-total">04</span>
+  </div>
+</div>
+<div class="step-progress mb-4">
+  <div class="step-bar step-bar-active" style="width: 75%"></div>
+</div>
+
+{% if not stego_op %}
+<!-- ── Upload Form ── -->
+<div class="flow-card">
+  <form method="post" enctype="multipart/form-data" id="embedForm">
+    {% csrf_token %}
+
+    <!-- Pre-fill payload and key from query params if coming from encrypt page -->
+    <input type="hidden" name="encrypted_payload" id="payloadField"
+           value="{{ request.GET.payload }}">
+    <input type="hidden" name="secret_key" id="keyField"
+           value="{{ request.GET.key }}">
+
+    {% if request.GET.payload %}
+    <div class="alert stego-alert alert-info mb-4">
+      <i class="bi bi-info-circle-fill me-2"></i>
+      Encrypted payload loaded from previous step. Upload a carrier image to proceed.
+    </div>
+    {% else %}
+    <!-- Manual payload entry -->
+    <div class="mb-4">
+      <div class="payload-label mb-2">ENCRYPTED PAYLOAD</div>
+      <textarea name="encrypted_payload" class="form-control stego-input stego-textarea"
+                placeholder="Paste your encrypted payload here..." rows="3" spellcheck="false"></textarea>
+    </div>
+    <div class="mb-4">
+      <div class="payload-label mb-2">SECRET KEY</div>
+      <input type="text" name="secret_key" class="form-control stego-input"
+             placeholder="Your Fernet secret key..." autocomplete="off" spellcheck="false">
+    </div>
+    {% endif %}
+
+    <!-- Image upload zone -->
+    <div class="payload-label mb-2">CARRIER IMAGE</div>
+    <div class="upload-zone" id="uploadZone">
+      <i class="bi bi-cloud-upload upload-icon"></i>
+      <p class="upload-title">Upload Carrier Image</p>
+      <p class="upload-hint">Drag & drop or click to browse (PNG, TIFF recommended)</p>
+      <label for="id_carrier_image" class="btn btn-outline-info mt-2">Select File</label>
+      <input type="file" name="carrier_image" id="id_carrier_image"
+             accept="image/png,image/jpeg,image/bmp,image/tiff"
+             class="upload-input" required>
+      <div class="upload-preview mt-3 d-none" id="previewWrap">
+        <img id="previewImg" src="" alt="Preview" class="upload-preview-img">
+        <span id="previewName" class="upload-preview-name"></span>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+      <button type="submit" class="btn btn-cipher btn-flow">
+        EMBED PAYLOAD <i class="bi bi-arrow-right ms-2"></i>
+      </button>
+    </div>
+  </form>
+</div>
+
+{% else %}
+<!-- ── Success: Download Stego Image ── -->
+<div class="flow-card">
+  <div class="result-success-banner mb-4">
+    <i class="bi bi-check-circle-fill me-2"></i>
+    Stego image generated: <strong>{{ stego_op.operation_name }}</strong>
+  </div>
+
+  <div class="row g-4 align-items-center">
+    <div class="col-md-5">
+      {% if stego_op.stego_image %}
+      <img src="{{ stego_op.stego_image.url }}" alt="Stego Image" class="stego-result-img">
+      {% endif %}
+    </div>
+    <div class="col-md-7">
+      <div class="stego-meta-grid mb-4">
+        <div><span class="meta-label">Operation</span><span class="meta-value">{{ stego_op.operation_name }}</span></div>
+        <div><span class="meta-label">Status</span><span class="badge op-badge op-badge-verified">VERIFIED</span></div>
+        <div><span class="meta-label">Encryption</span><span class="meta-value">{{ stego_op.encryption_method }}</span></div>
+        <div><span class="meta-label">Created</span><span class="meta-value">{{ stego_op.created_at|date:"d M Y H:i" }}</span></div>
+      </div>
+
+      <a href="{% url 'download_stego' stego_op.id %}" class="btn btn-cipher btn-lg w-100 mb-3">
+        <i class="bi bi-download me-2"></i>Download Stego Image
+      </a>
+      <a href="{% url 'encrypt' %}" class="btn btn-ghost w-100">
+        <i class="bi bi-plus-lg me-2"></i>New Cipher
+      </a>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const input = document.getElementById('id_carrier_image');
+const zone  = document.getElementById('uploadZone');
+const preview = document.getElementById('previewWrap');
+const previewImg = document.getElementById('previewImg');
+const previewName = document.getElementById('previewName');
+
+if (input) {
+  input.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        previewImg.src = ev.target.result;
+        previewName.textContent = file.name;
+        preview.classList.remove('d-none');
+        zone.classList.add('has-file');
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+// Drag & drop
+if (zone) {
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) {
+      input.files = e.dataTransfer.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+}
+</script>
+{% endblock %}

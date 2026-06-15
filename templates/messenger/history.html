@@ -1,0 +1,61 @@
+{% extends 'messenger/base.html' %}
+{% block title %}History — SecureStego{% endblock %}
+{% block page_title %}Operation History{% endblock %}
+
+{% block content %}
+<div class="flow-header mb-4">
+  <h2 class="flow-title">Operation History</h2>
+  <p class="flow-sub">Full record of encode and decode operations on your node.</p>
+</div>
+
+<div class="settings-card">
+  <div class="table-responsive">
+    <table class="stego-table">
+      <thead>
+        <tr>
+          <th>OPERATION</th>
+          <th>TYPE</th>
+          <th>ENCRYPTION</th>
+          <th>TIMESTAMP</th>
+          <th>STATUS</th>
+          <th>ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for op in operations %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="op-icon-sm">
+                <i class="bi bi-{% if op.operation_type == 'encode' %}image{% else %}envelope-open{% endif %}"></i>
+              </div>
+              <div>
+                <div class="op-name">{{ op.operation_name }}</div>
+                <div class="op-asset">{{ op.short_id }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge badge-op-{{ op.operation_type }}">{{ op.operation_type|upper }}</span></td>
+          <td class="font-mono">{{ op.encryption_method }}</td>
+          <td>{{ op.created_at|date:"d M Y H:i" }}</td>
+          <td><span class="badge op-badge op-badge-{{ op.status }}">{{ op.status|upper }}</span></td>
+          <td>
+            {% if op.operation_type == 'encode' and op.stego_image %}
+            <a href="{% url 'download_stego' op.id %}" class="btn btn-icon-sm" title="Download">
+              <i class="bi bi-download"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-5">
+            <i class="bi bi-shield-slash me-2"></i>No operations recorded yet.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

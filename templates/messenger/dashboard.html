@@ -1,0 +1,109 @@
+{% extends 'messenger/base.html' %}
+{% block title %}Dashboard — SecureStego{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- ── Node Status Banner ── -->
+<div class="node-banner mb-4">
+  <div class="node-icon">
+    <i class="bi bi-shield-fill-check"></i>
+  </div>
+  <div class="node-info flex-grow-1">
+    <h3 class="node-title">Encryption Node: Active</h3>
+    <p class="node-meta mb-0">
+      Uptime: 1,244:12:05 &nbsp;|&nbsp; Active Threads: 16 &nbsp;|&nbsp; Latency: 12ms
+    </p>
+  </div>
+  <div class="node-badges">
+    <span class="badge node-badge-verified">VERIFIED</span>
+    <span class="badge node-badge-e2e">E2EE-X3</span>
+  </div>
+</div>
+
+<!-- ── Quick Action Cards ── -->
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <a href="{% url 'encrypt' %}" class="action-card action-card--encode text-decoration-none d-block h-100">
+      <div class="action-icon"><i class="bi bi-shield-plus"></i></div>
+      <h4>New Cipher</h4>
+      <p>Inject encrypted payloads into high-resolution carrier assets with zero visual distortion.</p>
+      <span class="action-arrow"><i class="bi bi-arrow-right"></i></span>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="{% url 'extract' %}" class="action-card action-card--decode text-decoration-none d-block h-100">
+      <div class="action-icon"><i class="bi bi-eye-fill text-cipher-purple"></i></div>
+      <h4>Reveal Hidden Message</h4>
+      <p>Extract embedded data from confirmed nodes using shared decryption keys.</p>
+      <span class="action-arrow"><i class="bi bi-arrow-right"></i></span>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <div class="stats-card h-100">
+      <div class="stats-label">NETWORK ENTROPY</div>
+      <div class="stats-value">98.4<span class="stats-unit">%</span></div>
+      <div class="stats-bar-wrap">
+        <div class="stats-bar" style="width: 98.4%"></div>
+      </div>
+      <div class="stats-sub">
+        <span>MIN: 97.1%</span>
+        <span>MAX: 99.9%</span>
+        <span>AVG: 98.2%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Recent Operations ── -->
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="ops-card">
+      <div class="ops-header">
+        <h5 class="ops-title">Recent Operations</h5>
+        <a href="{% url 'history' %}" class="ops-view-all">VIEW ALL</a>
+      </div>
+      <div class="ops-list">
+        {% for op in recent_ops %}
+        <div class="op-row">
+          <div class="op-icon-wrap">
+            <i class="bi bi-{% if op.operation_type == 'encode' %}image{% else %}envelope-open{% endif %}"></i>
+          </div>
+          <div class="op-details flex-grow-1">
+            <span class="op-name">{{ op.operation_name }}</span>
+            <span class="op-asset">Asset: stego_{{ op.short_id }}.png</span>
+          </div>
+          <span class="op-time">{{ op.created_at|date:"H:i:s" }}</span>
+          <span class="badge op-badge op-badge-{{ op.status }}">{{ op.status|upper }}</span>
+        </div>
+        {% empty %}
+        <div class="op-empty">
+          <i class="bi bi-shield-slash me-2"></i>No operations yet. Start with a New Cipher.
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats column -->
+  <div class="col-lg-5">
+    <div class="mini-stats-grid">
+      <div class="mini-stat-card">
+        <div class="mini-stat-label">Total Operations</div>
+        <div class="mini-stat-value">{{ total_ops }}</div>
+      </div>
+      <div class="mini-stat-card">
+        <div class="mini-stat-label">Encoded</div>
+        <div class="mini-stat-value text-cipher">{{ encode_count }}</div>
+      </div>
+      <div class="mini-stat-card">
+        <div class="mini-stat-label">Decoded</div>
+        <div class="mini-stat-value text-cipher-purple">{{ decode_count }}</div>
+      </div>
+      <div class="mini-stat-card">
+        <div class="mini-stat-label">Node Status</div>
+        <div class="mini-stat-value text-success">{{ profile.node_status|title }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

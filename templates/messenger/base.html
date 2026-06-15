@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}SecureStego Messenger{% endblock %}</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link href="/static/css/style.css" rel="stylesheet">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="stego-body">
+
+{% if user.is_authenticated %}
+<!-- ── Authenticated Layout ── -->
+<div class="stego-layout">
+
+  <!-- Sidebar -->
+  <aside class="stego-sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="{% url 'home' %}" class="sidebar-brand">
+        <i class="bi bi-shield-lock-fill brand-icon"></i>
+        <span>SecureStego</span>
+      </a>
+    </div>
+
+    <!-- User profile card -->
+    <div class="sidebar-profile">
+      <div class="profile-avatar">
+        <i class="bi bi-shield-fill-check"></i>
+      </div>
+      <div class="profile-info">
+        <span class="profile-name">{{ user.profile.operator_id|default:user.username }}</span>
+        <span class="profile-status">
+          <span class="status-dot {% if user.profile.node_status == 'secure' %}status-secure{% endif %}"></span>
+          Node: {{ user.profile.node_status|title }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Nav links -->
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span>
+      </a>
+      <a href="{% url 'encrypt' %}" class="nav-item {% if request.resolver_match.url_name == 'encrypt' %}active{% endif %}">
+        <i class="bi bi-lock-fill"></i><span>Encrypt</span>
+      </a>
+      <a href="{% url 'embed' %}" class="nav-item {% if request.resolver_match.url_name == 'embed' %}active{% endif %}">
+        <i class="bi bi-image-fill"></i><span>Embed</span>
+      </a>
+      <a href="{% url 'extract' %}" class="nav-item {% if request.resolver_match.url_name == 'extract' %}active{% endif %}">
+        <i class="bi bi-eye-fill"></i><span>Extract</span>
+      </a>
+      <a href="{% url 'decrypt' %}" class="nav-item {% if request.resolver_match.url_name == 'decrypt' %}active{% endif %}">
+        <i class="bi bi-unlock-fill"></i><span>Decrypt</span>
+      </a>
+      <a href="{% url 'history' %}" class="nav-item {% if request.resolver_match.url_name == 'history' %}active{% endif %}">
+        <i class="bi bi-clock-history"></i><span>History</span>
+      </a>
+      <a href="{% url 'settings' %}" class="nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+        <i class="bi bi-gear-fill"></i><span>Settings</span>
+      </a>
+    </nav>
+
+    <!-- Bottom actions -->
+    <div class="sidebar-bottom">
+      <a href="{% url 'encrypt' %}" class="btn btn-cipher w-100 mb-3">
+        <i class="bi bi-plus-lg"></i> New Cipher
+      </a>
+      <a href="{% url 'security_log' %}" class="nav-item-sm">
+        <i class="bi bi-terminal-fill"></i><span>Security Log</span>
+      </a>
+      <a href="{% url 'logout' %}" class="nav-item-sm text-danger">
+        <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="stego-main">
+
+    <!-- Top bar -->
+    <header class="stego-topbar d-flex align-items-center justify-content-between">
+      <button class="btn btn-icon d-lg-none" id="sidebarToggle">
+        <i class="bi bi-list"></i>
+      </button>
+      <div class="topbar-title d-none d-lg-block">
+        {% block page_title %}{% endblock %}
+      </div>
+      <div class="topbar-right d-flex align-items-center gap-3">
+        <span class="topbar-signal"><i class="bi bi-broadcast"></i></span>
+        <span class="topbar-shield"><i class="bi bi-shield-check"></i></span>
+        <span class="topbar-user"><i class="bi bi-person-circle"></i></span>
+      </div>
+    </header>
+
+    <!-- Flash messages -->
+    {% if messages %}
+    <div class="messages-container px-4 pt-3">
+      {% for message in messages %}
+      <div class="alert stego-alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+        <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% elif message.tags == 'error' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Page content -->
+    <div class="stego-content">
+      {% block content %}{% endblock %}
+    </div>
+
+  </main>
+</div>
+
+{% else %}
+<!-- ── Public Layout ── -->
+<div class="public-layout">
+  {% block public_content %}{% endblock %}
+</div>
+{% endif %}
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/main.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
